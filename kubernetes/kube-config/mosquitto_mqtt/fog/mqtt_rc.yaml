@@ -15,7 +15,18 @@ spec:
         spec:
             containers:
             - name: mqtt
-              image: toke/mosquitto
+              image: jllopis/mosquitto:v1.4.10
               ports:
               - containerPort: 1883
               - containerPort: 9001
+              volumeMounts:
+              - name: mosquitto-config
+                mountPath: /etc/mosquitto.d/limit_queue.conf
+                subPath: limit_queue.conf
+            volumes:
+            - name: mosquitto-config
+              configMap:
+              name: mosquitto-config
+              items:
+              - key: limit-queue.conf
+                path: limit_queue.conf

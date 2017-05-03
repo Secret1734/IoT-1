@@ -15,7 +15,7 @@ spec:
       spec:
         containers:
         - name: openhab-3
-          image: huanphan/openhab:test_1
+          image: huanphan/openhab:semi-final
           resources:
             limits:
               memory: 512Mi
@@ -57,5 +57,5 @@ spec:
         #     - key: demo.sitemap
         #       path: demo.sitemap
         restartPolicy: Always
-        nodeSelector:
-          fog-node: worker_3
+#        nodeSelector:
+#          fog-node: worker_3

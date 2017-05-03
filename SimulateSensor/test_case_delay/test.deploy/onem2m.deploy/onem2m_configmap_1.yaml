@@ -15,7 +15,7 @@ spec:
       spec:
         containers:
         - name: onem2m-1
-          image: huanphan/onem2m:2.0
+          image: huanphan/onem2m:semi-final-4
           ports:
           - containerPort: 8080
           volumeMounts:

@@ -15,7 +15,7 @@ spec:
       spec:
         containers:
         - name: sensor-gen-2
-          image: huanphan/sensor-simulator:test_case_increase_inst
+          image: huanphan/sensor-simulator:semi-final
           volumeMounts:
           - name: sensor-config
             mountPath: /SimulateSensor/config/config.cfg
@@ -37,5 +37,5 @@ spec:
             - key: items.2.cfg
               path: items.cfg
         restartPolicy: Always
-        nodeSelector:
-          fog-node: worker_1
+#        nodeSelector:
+#          fog-node: worker_1

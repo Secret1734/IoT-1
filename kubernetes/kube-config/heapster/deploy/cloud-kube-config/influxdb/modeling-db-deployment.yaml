@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: modeling-influxdb
+  namespace: cloud-kube-system
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        task: modeling
+        k8s-app: modeling-influxdb
+    spec:
+      containers:
+      - name: influxdb
+        image: gcr.io/google_containers/heapster-influxdb:v0.13.0
+        volumeMounts:
+        - mountPath: /data
+          name: influxdb-storage-2
+      volumes:
+      - name: influxdb-storage-2
+        emptyDir: {}

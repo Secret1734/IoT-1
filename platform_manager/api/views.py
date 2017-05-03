@@ -24,8 +24,10 @@ RESPONSE_TEXT_TYPE_DEFINE = 'TEXT'
 class PlatformView(APIView):
     @csrf_exempt
     def get(self, request):
-        message = self._get_platform(request)
-        return HttpResponse(json.dumps({"status": "ok", "message": message}), content_type="application/json")
+        return self._get_platform(request)
+        # print('----')
+        # print(message)
+        # return HttpResponse(json.dumps({"status": "ok", "message": message}), content_type="application/json")
 
     @csrf_exempt
     def post(self, request):

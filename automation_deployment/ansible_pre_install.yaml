@@ -2,7 +2,7 @@
 - hosts: all  
   tasks:
    - name: Get Kubernetes Repo
-     shell: git clone https://github.com/kubernetes/kube-deploy.git
+     shell: git clone https://github.com/huanpc/kube-deploy.git
    - name: Install docker
      shell: wget -qO- https://get.docker.com/ | sh
    - name: Add user to docker group

@@ -1,0 +1,16 @@
+- hosts: all
+  tasks:
+   - name: Turndown
+     shell: /home/huanpc/kube-deploy/docker-multinode/turndown.sh  
+   - name: Clean docker
+     shell: docker ps -a -q || docker rm
+
+- hosts: master
+  tasks:
+    - name: Remove aufs file
+      shell: rm -rf /var/lib/docker/aufs/mnt/*
+
+- hosts: all
+  tasks:
+   - name: Reboot
+     shell: reboot

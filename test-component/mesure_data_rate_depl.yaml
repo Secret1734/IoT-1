@@ -1,5 +1,5 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: v1
+kind: ReplicationController
 metadata:
   name: measure-data-rate
   namespace: cloud-kube-system
@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: measure-data-rate
-        image: huanphan/measure-data-rate:test_case_deplay
+        image: huanphan/measure-data-rate:semi-final-2
         volumeMounts:
         - name: measure-items
           mountPath: /usr/src/app/items.cfg

@@ -1,0 +1,11 @@
+time_min = '2017-04-18 16:10:00'
+time_max = '2017-04-18 19:10:00'
+time_min_2 = '2017-04-18 16:11:00'
+time_max_2 = '2017-04-18 19:11:00'
+
+onem2m_naming = {'onem2m-1': '10 message/min', 'onem2m-2': '20 message/min', 'onem2m-3': '40 message/min'}
+openhab_naming = {'openhab-1': '10 message/min', 'openhab-2': '20 message/min', 'openhab-3': '40 message/min'}
+cloud_processing = ['measure-data-rate-1', 'measure-data-rate-2', 'measure-data-rate-3']
+cloud_processing_naming = {'measure-data-rate-1': '10 message/min', 'measure-data-rate-2': '20 message/min',
+                           'measure-data-rate-3': '40 message/min'}
+sensing_topic = ['sensor_1_1', 'sensor_2_1', 'sensor_3_1']

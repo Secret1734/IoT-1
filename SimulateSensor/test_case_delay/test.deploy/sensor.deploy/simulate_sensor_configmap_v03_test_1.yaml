@@ -15,7 +15,7 @@ spec:
       spec:
         containers:
         - name: sensor-gen-1
-          image: huanphan/sensor-simulator:tet_case_delay
+          image: huanphan/sensor-simulator:semi-final-qos
           volumeMounts:
           - name: sensor-config
             mountPath: /SimulateSensor/config/config.cfg

@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: measure-data-rate-1
+  namespace: cloud-kube-system
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        task: measure
+        app: measure-data-rate-1
+    spec:
+      containers:
+      - name: measure-data-rate-1
+        image: huanphan/measure-data-rate:semi-final-6
+        volumeMounts:
+        - name: measure-items
+          mountPath: /usr/src/app/items.cfg
+          subPath: items.cfg
+      volumes:
+      - name: measure-items
+        configMap:
+          name: measure-items-1
+          items:
+          - key: items.1.cfg
+            path: items.cfg
+
