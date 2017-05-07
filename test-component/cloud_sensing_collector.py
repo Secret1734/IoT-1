@@ -11,6 +11,7 @@ import subprocess
 db_client = InfluxDBClient('monitoring-influxdb', 8086, 'root', 'root', 'k8s')
 CONFIG_PATH = ''
 ITEM_PATH = 'items.cfg'
+QOS = 1
 
 
 def adaptor_convert_message(message):
@@ -59,7 +60,7 @@ def adaptor_convert_message(message):
         """
         root = ET.fromstring(message)
         adapted_message['timestamp_platform'] = float(root.find('./Timestamp').text)
-        adapted_message['timestamp_platform_process'] = float(root.find('./Timestamp_2').text)
+        # adapted_message['timestamp_platform_process'] = float(root.find('./Timestamp_2').text)
         adapted_message['timestamp_sensor'] = float(root.find('./Sensor/Timestamp').text)
         metric_node = root.find('./Sensor/Metric')
         adapted_message['num_of_sensor'] = int(root.find('./Sensor/num_of_sensor').text)
@@ -181,7 +182,7 @@ def create_message(data_payload, topic, time_received):
                 "round_trip_3": round_trip_3,
                 "timestamp_platform": float(data_payload['timestamp_platform']),
                 "timestamp_sensor": float(data_payload['timestamp_sensor']),
-                "timestamp_platform_process": float(data_payload['timestamp_platform_process']),
+                # "timestamp_platform_process": float(data_payload['timestamp_platform_process']),
                 "timestamp_cloud_process": (timenow - time_received),
             }
         }
@@ -195,7 +196,7 @@ def on_connect(client, userdata, flags, rc):
 
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    items = [(line.rstrip('\n'), 1) for line in open(ITEM_PATH)]
+    items = [(line.rstrip('\n'), QOS) for line in open(ITEM_PATH)]
     client.subscribe(items)
     # client.subscribe([('onem2m_pf_1/temperature', 0), ('onem2m_pf_2/temperature', 0), ('onem2m_pf_3/temperature', 0), ('onem2m_pf_4/temperature', 0), ('onem2m_pf_5/temperature', 0)])
 

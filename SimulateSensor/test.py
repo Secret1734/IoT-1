@@ -127,21 +127,21 @@ def gen_topic(start, end, type, prefix=None):
 # gen_openhab_item()
 # gen_topic(16,30,'openhab')
 # Gen instance
-# num = 10
+# num = 5
 # for i in range(1, 4):
-#     data = gen_sensor_item(start=1, end=num, is_onem2m=True, sensor_index=i, freq=10)
+#     data = gen_sensor_item(start=1, end=num, is_onem2m=True, sensor_index=i, freq=5)
 #     write_file('output/sensor/items.{index}.cfg'.format(index=i), data[0])
 #     write_file('output/platform/onem2m/items.{index}.cfg'.format(index=i), data[1])
 #     write_file('output/measure/items.{index}.cfg'.format(index=i), data[2])
-#     num *= 2
-#
-# num = 10
+#     num += 5
+# #
+# num = 5
 # for i in range(4, 7):
-#     data = gen_sensor_item(start=1, end=num, is_onem2m=False, sensor_index=i, freq=10)
+#     data = gen_sensor_item(start=1, end=num, is_onem2m=False, sensor_index=i, freq=5)
 #     write_file('output/sensor/items.{index}.cfg'.format(index=i), data[0])
 #     write_file('output/platform/openhab/demo.{index}.items'.format(index=i-3), data[1])
 #     write_file('output/measure/items.{index}.cfg'.format(index=i), data[2])
-#     num *= 2
+#     num += 5
 
 # Gen freq
 # freq = 10
@@ -161,11 +161,11 @@ def gen_topic(start, end, type, prefix=None):
 #     freq *= 2
 
 # Gen delay
-for i in range(1, 6):
-    data = gen_sensor_item(start=1, end=100, is_onem2m=True, sensor_index=i, freq=5)
+for i in range(1, 7):
+    data = gen_sensor_item(start=1, end=100, is_onem2m=False, sensor_index=i, freq=5)
     write_file('output/sensor/items.{index}.cfg'.format(index=i), data[0])
-    write_file('output/platform/onem2m/items.{index}.cfg'.format(index=i), data[1])
-    # write_file('output/platform/openhab/demo.{index}.items'.format(index=i), data[1])
+    # write_file('output/platform/onem2m/items.{index}.cfg'.format(index=i), data[1])
+    write_file('output/platform/openhab/demo.{index}.items'.format(index=i), data[1])
     write_file('output/measure/items.{index}.cfg'.format(index=i), data[2])
 
 # con = http.client.HTTPConnection(host='172.217.25.20', port=80)

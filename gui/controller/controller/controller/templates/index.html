@@ -1,0 +1,743 @@
+
+<!DOCTYPE html>
+
+
+
+<html lang="en-us" >
+<head>
+<title>Sensor administration | Django site admin</title>
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+
+<link rel="stylesheet" type="text/css" href="/static/jet/css/vendor.css?v=1.0.5" />
+<link rel="stylesheet" type="text/css" href="/static/jet/css/icons/style.css?v=1.0.5" />
+<link rel="stylesheet" type="text/css" href="/static/jet/css/themes/default/base.css?v=1.0.5" class="base-stylesheet" />
+<link rel="stylesheet" type="text/css" href="/static/jet/css/themes/default/select2.theme.css?v=1.0.5" class="select2-stylesheet" />
+<link rel="stylesheet" type="text/css" href="/static/jet/css/themes/default/jquery-ui.theme.css?v=1.0.5" class="jquery-ui-stylesheet" />
+
+
+
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/dashboard.css" />
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<!-- Include Required Prerequisites -->
+<script type="text/javascript" src="//cdn.jsdelivr.net/jquery/1/jquery.min.js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<!--<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap/3/css/bootstrap.css" />-->
+<!-- Include Date Range Picker -->
+<script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+
+<script type="text/javascript" charset="utf-8">
+    var DATE_FORMAT = "%Y-%m-%d";
+    var TIME_FORMAT = "%H:%M:%S";
+    var DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S";
+</script>
+<script type="text/javascript" src="/jet/jsi18n/"></script>
+<script src="/static/jet/js/build/bundle.min.js?v=1.0.5"></script>
+
+<style type="text/css">
+    textarea {
+        height: 100% !important;
+        width: 100% !important;
+    }
+</style>
+
+    <script src="/static/jet/js/i18n/select2/en.js?v=1.0.5"></script>
+
+
+<script type="text/javascript">
+$(function() {
+    var AjaxUtil = {
+      request: function (ajaxSetting) {
+        var AjaxUtil = this;
+
+        var commonSetting = {
+          data: {},
+          dataType: 'json',
+          crossDomain: true,
+        };
+
+        var finalSetting = $.extend(commonSetting, ajaxSetting);
+        $.ajax(finalSetting);
+      },
+    };
+
+    $('#time_picked').on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('DD-MM-YYYY H:MM'));
+    });
+
+
+    $('#time_picked').daterangepicker({
+        "singleDatePicker": true,
+        "timePicker": true,
+        "timePicker24Hour": true,
+        "autoUpdateInput":true,
+        "timePickerIncrement": 30,
+        "autoUpdateInput": false,
+        "startDate": "05/05/2017",
+        "endDate": "05/05/2017",
+        "opens": "center"
+    }, function(start, end, label) {
+        $('#i_spinner_0').show();        
+      <!--console.log("New date range selected: " + start.format('DD-MM-YYYY H:MM') + " to " + end.format('YYYY-MM-DD H:MM') + " (predefined range: " + label + ")");-->
+      var dateString = start.format('DD-MM-YYYY H:MM'),
+        dateTimeParts = dateString.split(' '),
+        timeParts = dateTimeParts[1].split(':'),
+        dateParts = dateTimeParts[0].split('-');
+      console.log(dateString);
+      var timestamp = new Date(dateParts[2], parseInt(dateParts[1], 10) - 1, dateParts[0], timeParts[0], timeParts[1]).getTime()/1000 - 7*3600;
+      var uri = '/xml_query/' + timestamp;
+      AjaxUtil.request({
+          headers: $.extend({}, {}, {"X-Requested-With": "XMLHttpRequest", "Content-Type": "application/json"}),
+          method: "GET",
+          url: uri,        
+          success: function (response, textStatus, jqXHR) {            
+            $('#i_spinner_0').hide();
+            for (i=0; i<response.length; i++) {
+                var xml_string = response[i].content;
+                var resource_id = xml_string.substring(xml_string.indexOf("<ResourceId>") + "<ResourceId>".length, xml_string.indexOf("</ResourceId>"));
+                var list_item = $("<li></li>").text(resource_id).attr("data", xml_string);
+                $('#list_xml_item').append(list_item);
+            }            
+            $('#list_xml_item li').click(function(e){
+                $('#i_spinner').show();
+                $('#xml_text_output').text($(this).attr('data'));                
+                $('#i_spinner').hide();                
+            });
+          },
+           error: function (jqXHR, textStatus, errorThrown) {            
+            debugger;
+            var xml_string = jqXHR.responseText;
+            var resource_id = xml_string.substring(xml_string.indexOf("<ResourceId>") + "<ResourceId>".length, xml_string.indexOf("</ResourceId>"));
+            $('#list_xml_item li').text(resource_id).attr("data", jqXHR.responseText);
+          },
+        });
+    });
+    
+});
+</script>
+
+
+
+
+<meta name="robots" content="NONE,NOARCHIVE" />
+</head>
+
+
+<body class=" dashboard jet app-sensor"
+  data-admin-utc-offset="0">
+
+<!-- Container -->
+<div id="container">
+
+
+    <!-- Header -->
+    <div id="header">
+        <div id="branding">
+<h1 id="site-name"><a href="/admin/">Django administration</a></h1>
+</div>
+
+
+        <div id="user-tools">
+
+                Welcome,
+                <strong>admin</strong>.
+
+
+
+                    <a href="/">View site</a> /
+
+
+
+
+
+
+                <a href="/admin/password_change/">Change password</a> /
+
+                <a href="/admin/logout/">Log out</a>
+
+        </div>
+
+
+    </div>
+    <!-- END Header -->
+
+
+        <div class="breadcrumbs"></div>
+
+
+
+
+<div class="dashboard-tools-toggle-container">
+    <a href="#" class="dashboard-tools-toggle button">
+        <span class="dashboard-tools-toggle-icon icon-settings"></span>
+    </a>
+</div>
+<div class="dashboard-tools">
+    <form action="/jet/dashboard/add_user_dashboard_module/" method="POST" id="add-dashboard-module-form">
+        <input type='hidden' name='csrfmiddlewaretoken' value='erVFR2Zu0Rmr1lZLBOYk0MPRcpzaEzG6' />
+        <select class="add-dashboard" name="module">
+            <option>widgets</option>
+            <optgroup label="available">
+
+                    <option value="0" data-type="available_children">Links</option>
+
+            </optgroup>
+            <optgroup label="initials">
+
+                    <option value="0" data-type="children">Application models</option>
+
+                    <option value="1" data-type="children">Recent Actions</option>
+
+            </optgroup>
+        </select><a href="#" class="button add-dashboard-link" title="Add"><span class="add-dashboard-link-icon icon-add"></span><span class="add-dashboard-link-label">Add</span></a>
+        <input type="hidden" name="app_label" value="sensor">
+        <input type="hidden" name="type" value="">
+        <a href="#" class="button transparent reset-dashboard-link" title="Reset widgets"><span class="reset-dashboard-link-icon icon-reset"></span><span class="reset-dashboard-link-label">Reset widgets</span></a>
+    </form>
+    <form action="/jet/dashboard/reset_dashboard/" method="POST" id="reset-dashboard-form">
+        <input type='hidden' name='csrfmiddlewaretoken' value='erVFR2Zu0Rmr1lZLBOYk0MPRcpzaEzG6' />
+        <input type="hidden" name="app_label" value="sensor">
+    </form>
+    <div class="dialog-confirm" id="reset-dashboard-dialog" title="Reset widgets">
+        <p>Are you sure want to reset widgets?</p>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+    <!-- Content -->
+    <div id="content" class="colM">
+
+        <h1>Sensor administration</h1>
+
+
+
+<div class="dashboard-container columns_2 cf">
+
+        <div class="dashboard-column-wrapper">
+            <div class="dashboard-column first">
+                <div class="dashboard-item collapsible deletable draggable" data-module-id="9">
+                    <div class="dashboard-item-header">
+
+                            <span class="dashboard-item-header-drag icon-grid"></span>
+
+                        <span class="dashboard-item-header-buttons">
+                            <a href="/jet/dashboard/module/9/" title="Change"><span class="icon-edit"></span></a>
+
+                            
+                                <a href="#" title="Delete" class="dashboard-item-remove"><span class="icon-cross"></span></a>
+                            
+                        </span>
+                        <span class="dashboard-item-header-title">
+                            
+                                <a href="#" class="dashboard-item-collapse"><span class="dashboard-item-header-collapse-button icon-arrow-down"></span></a>
+                                <a href="#" class="dashboard-item-collapse"><span class="dashboard-item-header-collapse-button icon-arrow-up"></span></a>                                                    
+                                Time                        
+                        </span>
+                        <div class="cf"></div>
+                    </div>
+
+                        <div class="dashboard-item-content">
+
+                            <ul>
+                                    <li>
+                                            <label>Time choose </label>
+                                            <input type="text" id="time_picked" class="form-control" style="margin-left: 200px;" />
+                                    </li>
+                            </ul>
+                        </div>
+                </div>
+            </div>
+            <div class="dashboard-column first">
+                <div class="dashboard-item collapsible deletable draggable" data-module-id="9">
+                    <div class="dashboard-item-header">
+
+                            <span class="dashboard-item-header-drag icon-grid"></span>
+
+                        <span class="dashboard-item-header-buttons">
+                            <a href="/jet/dashboard/module/9/" title="Change"><span class="icon-edit"></span></a>
+
+                            
+                                <a href="#" title="Delete" class="dashboard-item-remove"><span class="icon-cross"></span></a>
+                            
+                        </span>
+                        <span class="dashboard-item-header-title">
+                            
+                                <a href="#" class="dashboard-item-collapse"><span class="dashboard-item-header-collapse-button icon-arrow-down"></span></a>
+                                <a href="#" class="dashboard-item-collapse"><span class="dashboard-item-header-collapse-button icon-arrow-up"></span></a>                                                    
+                                XSD specification                        
+                        </span>
+                        <div class="cf"></div>
+                    </div>
+
+                        <div class="dashboard-item-content">                   
+                        <div class="container" style="overflow-y: scroll;height: 400px;">
+                            <textarea id="xsd_text_output" disabled="true">
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="data">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="timestamp" type="xs:integer"/>
+                <xs:element name="endpoint" type="xs:string"/>
+                <xs:element name="metric_name">
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="temperature"/>
+                        <xs:enumeration value="air_humidity"/>
+                        <xs:enumeration value="light"/>
+                        <xs:enumeration value="human_appearance"/>
+                        <xs:enumeration value="cpu_usage_rate"/>
+                        <xs:enumeration value="memory_usage"/>
+                        <xs:enumeration value="network_in"/>
+                        <xs:enumeration value="network_out"/>
+                        <xs:enumeration value="storage_usage"/>
+                    </xs:restriction>
+                </xs:element>
+                <xs:element name="type">
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="gauge"/>
+                        <xs:enumeration value="counter"/>
+                        <xs:enumeration value="histogram"/>
+                        <xs:enumeration value="summary"/>
+                    </xs:restriction>
+                </xs:element>
+                <xs:element name="data_type">
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="float"/>
+                        <xs:enumeration value="int"/>
+                        <xs:enumeration value="double"/>
+                        <xs:enumeration value="short"/>
+                    </xs:restriction>
+                </xs:element>
+                <xs:element name="unit">
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="celsius"/>
+                        <xs:enumeration value="fahrenheit"/>
+                        <xs:enumeration value="kbps"/>
+                        <xs:enumeration value="seconds"/>
+                        <xs:enumeration value="count"/>
+                        <xs:enumeration value="milicore"/>
+                        <xs:enumeration value="byte"/>
+                        <xs:enumeration value="iso"/>
+                        <xs:enumeration value="ratio"/>
+                    </xs:restriction>
+                </xs:element>
+                <xs:element name="polling_frequency" type="xs:float"/>      
+                <xs:element name="value" type="xs:float"/>
+                <xs:element name="category">
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="data_sensing"/>
+                        <xs:enumeration value="resource"/>
+                    </xs:restriction>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
+                            </textarea>
+                        </div>                            
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-column-wrapper">
+            <div class="dashboard-column">
+                <div class="dashboard-item collapsible deletable draggable" data-module-id="10">
+                    <div class="dashboard-item-header">
+
+                            <span class="dashboard-item-header-drag icon-grid"></span>
+
+                        <span class="dashboard-item-header-buttons">
+                            <a href="/jet/dashboard/module/10/" title="Change"><span class="icon-edit"></span></a>
+
+                            
+                                <a href="#" title="Delete" class="dashboard-item-remove"><span class="icon-cross"></span></a>
+                            
+                        </span>
+                        <span class="dashboard-item-header-title">
+                            
+                                <a href="#" class="dashboard-item-collapse"><span class="dashboard-item-header-collapse-button icon-arrow-down"></span></a>
+                                <a href="#" class="dashboard-item-collapse"><span class="dashboard-item-header-collapse-button icon-arrow-up"></span></a>
+                            
+
+                            
+                                List resource
+                            
+                        </span>
+                        <div class="cf"></div>
+                    </div>
+
+                    <div class="dashboard-item-content">
+                        <div class="container" style="overflow-y: scroll;height: 200px;">
+                        <i id="i_spinner_0" class="fa fa-spinner fa-spin" style="font-size: 30px;
+                    position: absolute;
+                    margin-bottom: 100px;
+                    margin-top: 100px;
+                    margin-left: 250px;margin-right: 250px;display: none;"></i>
+                            <ul id="list_xml_item">
+                            </ul>
+                        </div>        
+                          
+                    </div>
+                </div>
+            </div>
+            <div class="dashboard-column">
+                <div class="dashboard-item collapsible deletable draggable" data-module-id="10">
+                    <div class="dashboard-item-header">
+
+                            <span class="dashboard-item-header-drag icon-grid"></span>
+
+                        <span class="dashboard-item-header-buttons">
+                            <a href="/jet/dashboard/module/10/" title="Change"><span class="icon-edit"></span></a>
+
+                            
+                                <a href="#" title="Delete" class="dashboard-item-remove"><span class="icon-cross"></span></a>
+                            
+                        </span>
+                        <span class="dashboard-item-header-title">
+                            
+                                <a href="#" class="dashboard-item-collapse"><span class="dashboard-item-header-collapse-button icon-arrow-down"></span></a>
+                                <a href="#" class="dashboard-item-collapse"><span class="dashboard-item-header-collapse-button icon-arrow-up"></span></a>
+                            XML Data
+                        </span>
+                        <div class="cf"></div>
+                    </div>
+
+                    <div class="dashboard-item-content">                
+                        <div class="container" style="overflow-y: scroll;height: 300px;">
+                            <i id="i_spinner" class="fa fa-spinner fa-spin" style="font-size: 30px;
+                    position: absolute;
+                    margin-bottom: 100px;
+                    margin-top: 100px;
+                    margin-left: 250px;margin-right: 250px;display: none;"></i>
+                            <textarea id="xml_text_output" disabled="true"></textarea>
+                        </div>        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</div>
+
+<div class="dialog-confirm" id="module-remove-dialog" title="Delete widget">
+    <p>Are you sure want to delete this widget?</p>
+</div>
+
+<form action="/jet/dashboard/update_dashboard_modules/" method="POST" id="update-dashboard-modules-form">
+    <input type='hidden' name='csrfmiddlewaretoken' value='erVFR2Zu0Rmr1lZLBOYk0MPRcpzaEzG6' />
+    <input type="hidden" name="app_label" value="sensor">
+    <input type="hidden" name="modules">
+</form>
+
+<form action="/jet/dashboard/update_dashboard_module_collapse/" method="POST" id="update-dashboard-module-collapse-form">
+    <input type='hidden' name='csrfmiddlewaretoken' value='erVFR2Zu0Rmr1lZLBOYk0MPRcpzaEzG6' />
+    <input type="hidden" name="id">
+    <input type="hidden" name="collapsed">
+</form>
+
+<form action="/jet/dashboard/remove_dashboard_module/" method="POST" id="remove-dashboard-module-form">
+    <input type='hidden' name='csrfmiddlewaretoken' value='erVFR2Zu0Rmr1lZLBOYk0MPRcpzaEzG6' />
+    <input type="hidden" name="id">
+</form>
+
+
+
+
+        <br class="clear" />
+    </div>
+    <!-- END Content -->
+
+    <div id="footer"></div>
+
+
+
+
+
+
+
+
+        <div class="related-popup-container scrollable">
+            <a href="#" class="related-popup-back">
+                <span class="related-popup-back-icon icon-arrow-left"></span>
+                <span class="related-popup-back-label">back</span>
+            </a>
+            <span class="icon-refresh loading-indicator"></span>
+        </div>
+
+        <div class="sidebar-header-wrapper sidebar-dependent">
+            <div class="sidebar-header sidebar-dependent">
+                <a href="#" class="sidebar-header-menu sidebar-toggle">
+                    <span class="sidebar-header-menu-icon icon-menu"></span>
+                    <span class="sidebar-header-menu-icon icon-cross"></span>
+                </a>
+            </div>
+        </div>
+        <div class="sidebar sidebar-dependent">
+            <div class="sidebar-wrapper scrollable">
+                <div class="sidebar-section">
+
+                        <a href="/admin/" class="sidebar-link icon">
+                            <span class="sidebar-link-label">
+                                <span class="sidebar-link-icon icon-data"></span>
+                                Home
+                            </span>
+                        </a>
+
+
+                        <a href="/" class="sidebar-link icon">
+                            <span class="sidebar-link-label">
+                                <span class="sidebar-link-icon icon-open-external"></span>
+                                View site
+                            </span>
+                        </a>
+
+
+
+
+                </div>
+
+
+
+
+
+                            <form action="/jet/toggle_application_pin/" method="POST" id="toggle-application-pin-form">
+                                <input type='hidden' name='csrfmiddlewaretoken' value='erVFR2Zu0Rmr1lZLBOYk0MPRcpzaEzG6' />
+                                <input type="hidden" name="app_label">
+                            </form>
+
+                            <div class="sidebar-section">
+                                <div class="sidebar-title">
+                                    <span class="sidebar-right">
+                                        <a href="#" class="sidebar-right-edit edit-apps-list"><span class="icon-settings"></span></a>
+                                    </span>
+                                    Applications
+                                </div>
+
+                                <div class="apps-list-pinned">
+
+                                </div>
+                                <a href="#" class="sidebar-center-link apps-hide">
+                                    <span class="apps-hide-label apps-visible">Hide applications</span>
+                                    <span class="apps-hide-label apps-hidden">Show hidden</span>
+                                </a>
+                                <div class="apps-list">
+
+                                        <a href="/admin/auth/" class="sidebar-link popup-section-link app-item" data-app-label="auth" data-popup-section-class="sidebar-popup-section-auth">
+                                            <span class="sidebar-left collapsible">
+                                                <span class="sidebar-left-pin icon-star pin-toggle"></span>
+                                                <span class="sidebar-left-unpin icon-cross pin-toggle"></span>
+                                            </span>
+
+                                            <span class="sidebar-right">
+                                                <span class="sidebar-right-arrow icon-arrow-right"></span>
+                                            </span>
+
+                                            <span class="sidebar-link-label">
+                                                
+                                                    Authentication and Authorization
+                                                
+                                            </span>
+                                        </a>
+
+                                        <a href="/admin/iot_platform/" class="sidebar-link popup-section-link app-item" data-app-label="iot_platform" data-popup-section-class="sidebar-popup-section-iot_platform">
+                                            <span class="sidebar-left collapsible">
+                                                <span class="sidebar-left-pin icon-star pin-toggle"></span>
+                                                <span class="sidebar-left-unpin icon-cross pin-toggle"></span>
+                                            </span>
+
+                                            <span class="sidebar-right">
+                                                <span class="sidebar-right-arrow icon-arrow-right"></span>
+                                            </span>
+
+                                            <span class="sidebar-link-label">
+                                                
+                                                    Iot_Platform
+                                                
+                                            </span>
+                                        </a>
+
+                                        <a href="/admin/sensor/" class="sidebar-link popup-section-link app-item" data-app-label="sensor" data-popup-section-class="sidebar-popup-section-sensor">
+                                            <span class="sidebar-left collapsible">
+                                                <span class="sidebar-left-pin icon-star pin-toggle"></span>
+                                                <span class="sidebar-left-unpin icon-cross pin-toggle"></span>
+                                            </span>
+
+                                            <span class="sidebar-right">
+                                                <span class="sidebar-right-arrow icon-arrow-right"></span>
+                                            </span>
+
+                                            <span class="sidebar-link-label">
+                                                
+                                                    Sensor
+                                                
+                                            </span>
+                                        </a>
+
+                                        <a href="/metrics" class="sidebar-link popup-section-link app-item" data-app-label="sensor" data-popup-section-class="sidebar-popup-section-sensor">
+                                            <span class="sidebar-left collapsible">
+                                                <span class="sidebar-left-pin icon-star pin-toggle"></span>
+                                                <span class="sidebar-left-unpin icon-cross pin-toggle"></span>
+                                            </span>
+
+                                            <span class="sidebar-right">
+                                                <span class="sidebar-right-arrow icon-arrow-right"></span>
+                                            </span>
+
+                                            <span class="sidebar-link-label">
+
+                                                    Metrics
+
+                                            </span>
+                                        </a>
+                                </div>
+                            </div>
+
+
+
+                    <div class="sidebar-section last">
+                        <div class="dialog-confirm" id="bookmarks-add-dialog" title="Add bookmark">
+                            <form action="/jet/add_bookmark/" method="POST" id="bookmarks-add-form">
+                                <input type='hidden' name='csrfmiddlewaretoken' value='erVFR2Zu0Rmr1lZLBOYk0MPRcpzaEzG6' />
+                                <p>Title:</p>
+                                <input type="text" name="title" class="fill_width">
+                                <p>URL:</p>
+                                <input type="text" name="url" class="fill_width">
+                            </form>
+                        </div>
+                        <form action="/jet/remove_bookmark/" method="POST" id="bookmarks-remove-form">
+                            <input type='hidden' name='csrfmiddlewaretoken' value='erVFR2Zu0Rmr1lZLBOYk0MPRcpzaEzG6' />
+                            <input type="hidden" name="id">
+                        </form>
+                        <div class="dialog-confirm" id="bookmarks-remove-dialog" title="Delete bookmark">
+                            <p>Are you sure want to delete this bookmark?</p>
+                        </div>
+
+                        <div class="sidebar-title">
+                            <span class="sidebar-right">
+                                <a href="#" class="sidebar-right-plus bookmarks-add" title="Add bookmark" data-title="Sensor administration"><span class="icon-add"></span></a>
+                            </span>
+                            bookmarks
+                        </div>
+
+                        <div class="bookmarks-list">
+
+
+                            <a class="sidebar-link bookmark-item clone">
+                                <span class="sidebar-right collapsible">
+                                    <span class="sidebar-right-remove bookmarks-remove">Remove</span>
+                                </span>
+                                <span class="sidebar-link-label"></span>
+                            </a>
+                        </div>
+                    </div>
+
+            </div>
+
+
+                <div class="sidebar-popup-container">
+                    <div class="sidebar-popup scrollable">
+                        <a href="#" class="sidebar-close sidebar-back">
+                            <span class="sidebar-close-icon icon-arrow-left"></span>
+                        </a>
+
+                            <div class="sidebar-popup-section sidebar-popup-section-auth">
+                                <div class="sidebar-popup-title">
+
+                                        Authentication and Authorization
+
+                                </div>
+
+                                <input class="sidebar-popup-search" placeholder="Search...">
+
+                                <ul class="sidebar-popup-list">
+                                    <li class="sidebar-popup-list-item app-auth">
+                                        <a href="/admin/auth/" class="sidebar-popup-list-item-link">Application page</a>
+                                    </li>
+
+
+                                        <li class="sidebar-popup-list-item model-group">
+
+                                                <a href="/admin/auth/group/" class="sidebar-popup-list-item-link">Groups</a>
+
+                                        </li>
+
+                                        <li class="sidebar-popup-list-item model-user">
+
+                                                <a href="/admin/auth/user/" class="sidebar-popup-list-item-link">Users</a>
+
+                                        </li>
+
+                                </ul>
+                            </div>
+
+                            <div class="sidebar-popup-section sidebar-popup-section-iot_platform">
+                                <div class="sidebar-popup-title">
+
+                                        Iot_Platform
+
+                                </div>
+
+                                <input class="sidebar-popup-search" placeholder="Search...">
+
+                                <ul class="sidebar-popup-list">
+                                    <li class="sidebar-popup-list-item app-iot_platform">
+                                        <a href="/admin/iot_platform/" class="sidebar-popup-list-item-link">Application page</a>
+                                    </li>
+
+
+                                        <li class="sidebar-popup-list-item model-platformmodel">
+
+                                                <a href="/admin/iot_platform/platformmodel/" class="sidebar-popup-list-item-link">Platform models</a>
+
+                                        </li>
+
+                                </ul>
+                            </div>
+
+                            <div class="sidebar-popup-section sidebar-popup-section-sensor">
+                                <div class="sidebar-popup-title">
+
+                                        Sensor
+
+                                </div>
+
+                                <input class="sidebar-popup-search" placeholder="Search...">
+
+                                <ul class="sidebar-popup-list">
+                                    <li class="sidebar-popup-list-item app-sensor current">
+                                        <a href="/admin/sensor/" class="sidebar-popup-list-item-link">Application page</a>
+                                    </li>
+
+
+                                        <li class="sidebar-popup-list-item model-sensormodel">
+
+                                                <a href="/admin/sensor/sensormodel/" class="sidebar-popup-list-item-link">Sensor models</a>
+
+                                        </li>
+
+                                </ul>
+                            </div>
+
+                    </div>
+                </div>
+
+        </div>
+
+
+
+
+</div>
+<!-- END Container -->
+
+</body>
+</html>

@@ -60,7 +60,9 @@ ROOT_URLCONF = 'controller.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            'controller/templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
