@@ -68,7 +68,7 @@ def deploy_sensor(sender, instance, **kwargs):
 @receiver(models.signals.post_delete, sender=SensorModel)
 def delete_sensor(sender, instance, **kwargs):
     print('--- Delete sensor')
-    print(kubernetes_client.delete_resource(instance.resource_id, namespace=instance.namespace, resource_type=kubernetes_tmpl.REPLICATION_RESOURCE))
+    print(kubernetes_client.delete_resource(instance.resource_id, namespace='kube-system', resource_type=kubernetes_tmpl.REPLICATION_RESOURCE))
     print('--- Delete configmap')
     config_uid = settings.SENSOR['config_configmap']['name']+'-'+instance.resource_id
     print(kubernetes_client.delete_resource(config_uid, namespace=instance.namespace, resource_type=kubernetes_tmpl.CONFIG_MAP_RESOURCE))

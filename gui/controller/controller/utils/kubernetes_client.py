@@ -29,6 +29,7 @@ def deploy_platform(**data):
                 "metadata": {
                     "name": platform_name,
                     "labels": {
+                        "resource_type": "platform",
                         "app": platform_name,
                         "description": data['description'],
                         "namespace": namespace,
@@ -123,7 +124,8 @@ def deploy_sensor(**data):
                         # "regex": data['regex'],
                         "version": data['version'],
                         "sensor_type": data['sensor_type'],
-                        "manufacturer": data['manufacturer']
+                        "manufacturer": data['manufacturer'],
+                        "resource_type": "sensor",
                     },
                 },
                 "spec": {
@@ -175,12 +177,12 @@ def deploy_sensor(**data):
     return raw
 
 
-def delete_resource(resource_id, namespace='kube-system', resource_type=kubernetes_tmpl.REPLICATION_RESOURCE):
+def delete_resource(resource_id, namespace='kube-system', resource_type=kubernetes_tmpl.REPLICATION_RESOURCE, kube_api=settings.KUBE_API_DOMAIN):
     # /api/v1/namespaces/kube-system/replicationcontrollers/openhab-platform
     uri_api = '/api/v1/namespaces/{namespace}/{resource_type}/{resource_id}'.format(namespace=namespace,
                                                                                     resource_id=resource_id,
                                                                                     resource_type=resource_type)
-    con = http.client.HTTPConnection(settings.KUBE_API_DOMAIN)
+    con = http.client.HTTPConnection(kube_api)
     header = {"Content-type": "application/json"}
     con.request('DELETE', uri_api, '', header)
     response = con.getresponse()
@@ -188,11 +190,11 @@ def delete_resource(resource_id, namespace='kube-system', resource_type=kubernet
     return raw
 
 
-def delete_resource_by_label(label_key, label_val, namespace='kube-system', resource_type=kubernetes_tmpl.REPLICATION_RESOURCE):
+def delete_resource_by_label(label_key, label_val, namespace='kube-system', resource_type=kubernetes_tmpl.REPLICATION_RESOURCE, kube_api=settings.KUBE_API_DOMAIN):
     uri_api = '/api/v1/namespaces/{namespace}/{resource_type}/?labelSelector={label}'.format(namespace=namespace,
                                                                                     resource_type=resource_type,
                                                                                     label='{}%3D{}'.format(label_key, label_val))
-    con = http.client.HTTPConnection(settings.KUBE_API_DOMAIN)
+    con = http.client.HTTPConnection(kube_api)
     header = {"Content-type": "application/json"}
     con.request('DELETE', uri_api, '', header)
     response = con.getresponse()
@@ -225,6 +227,7 @@ def deploy_configmap(resource_type, is_item=True, is_config=True, **resource):
 
 
 def deploy_configmap_item(**data):
+    print('--------------------------')
     key = data['key']
     value = data['value']
     namespace = data['namespace']
@@ -241,7 +244,10 @@ def deploy_configmap_item(**data):
         }
     }
     deploy_api = '/api/v1/namespaces/{namespace}/configmaps'.format(namespace=namespace)
-    con = http.client.HTTPConnection(settings.KUBE_API_DOMAIN)
+    kube_api = settings.KUBE_API_DOMAIN
+    if data.get('kube_api'):
+        kube_api = data.get('kube_api')
+    con = http.client.HTTPConnection(kube_api)
     header = {"Content-type": "application/json"}
     con.request('POST', deploy_api, json.dumps(body).encode('utf-8'), header)
     response = con.getresponse()
@@ -258,8 +264,8 @@ def gen_configmap(resource_type, platform_type='onem2m', **resource_data):
         item = item.format(id=resource_data['resource_id'], freq='10', namespace=resource_data['namespace'], version='v01')
     elif resource_type == 'platform':
         if platform_type == "onem2m":
-            key_config = kubernetes_tmpl.ONEM2M_CONFIG
-            key_item = kubernetes_tmpl.ONEM2M_ITEM
+            key_config = kubernetes_tmpl.ONEM2M_CONFIG_KEY
+            key_item = kubernetes_tmpl.ONEM2M_ITEM_KEY
             config = kubernetes_tmpl.ONEM2M_CONFIG
             config['clientId'] = resource_data['resource_id']
             item = kubernetes_tmpl.ONEM2M_ITEM
@@ -268,7 +274,7 @@ def gen_configmap(resource_type, platform_type='onem2m', **resource_data):
             key_item = kubernetes_tmpl.OPENHAB_ITEM_KEY
             config = kubernetes_tmpl.OPENHAB_CONFIG.replace("/mqttIn.clientId/", resource_data['resource_id'])
             item = kubernetes_tmpl.OPENHAB_ITEM.replace("/sensor_id/", "demo")
-    return {'config': config, 'item': item, 'config_key': key_config, 'item_key': key_item}
+    return {'config': str(config), 'item': str(item), 'config_key': key_config, 'item_key': key_item}
 
 
 def assign_sensor_to_platform(sensor_id, platform_id, namespace='kube-system', platform_type='onem2m'):
@@ -277,12 +283,31 @@ def assign_sensor_to_platform(sensor_id, platform_id, namespace='kube-system', p
     print('Delete old item')
     print(delete_resource(item_uid, namespace=namespace,
                                             resource_type=kubernetes_tmpl.CONFIG_MAP_RESOURCE))
+    print('Delete old item for cloud sensing')
+    print(delete_resource(kubernetes_tmpl.CLOUD_SENSING_ITEM_CONFIG, namespace=kubernetes_tmpl.CLOUD_NAMESPACE,
+                          resource_type=kubernetes_tmpl.CONFIG_MAP_RESOURCE, kube_api=settings.CLOUD_KUBE_API_DOMAIN))
+
     # create new item
-    item = kubernetes_tmpl.OPENHAB_ITEM.replace("/sensor_id/", sensor_id)
-    data = {'key': kubernetes_tmpl.OPENHAB_ITEM_KEY, 'value': item, 'namespace': namespace, 'config_name': item_uid}
+    key = ''
+    if platform_type == 'openhab':
+        item = kubernetes_tmpl.OPENHAB_ITEM.replace("/sensor_id/", sensor_id)
+        key = 'demo.items'
+    else:
+        item = kubernetes_tmpl.ONEM2M_ITEM.replace("test", sensor_id)
+        key = 'items.cfg'
+    data = {'key': key, 'value': item, 'namespace': namespace, 'config_name': item_uid, 'kube_api': settings.KUBE_API_DOMAIN}
     print('Create new item')
     print(deploy_configmap_item(**data))
 
+    print('Create new item for cloud sensing')
+    item = kubernetes_tmpl.CLOUD_SENSING_ITEM.replace("/sensor_id/", sensor_id)
+    data = {'key': kubernetes_tmpl.CLOUD_SENSING_ITEM_KEY, 'value': item, 'namespace': kubernetes_tmpl.CLOUD_NAMESPACE, 'config_name': kubernetes_tmpl.CLOUD_SENSING_ITEM_CONFIG, 'kube_api': settings.CLOUD_KUBE_API_DOMAIN}
+    print(deploy_configmap_item(**data))
+
     # reset pod
-    print('Reset pod')
-    print(delete_resource_by_label(label_key='app', label_val=platform_id, namespace=namespace, resource_type=kubernetes_tmpl.POD_RESOURCE))
+    print('Reset platform pod')
+    print(delete_resource_by_label(label_key='app', label_val=platform_id, namespace=namespace, resource_type=kubernetes_tmpl.POD_RESOURCE, kube_api=settings.CLOUD_KUBE_API_DOMAIN))
+
+    print('Reset cloud sensing pod')
+    print(delete_resource_by_label(label_key='app', label_val=kubernetes_tmpl.CLOUD_SENSING_ID, namespace=kubernetes_tmpl.CLOUD_NAMESPACE,
+                                   resource_type=kubernetes_tmpl.POD_RESOURCE, kube_api=settings.CLOUD_KUBE_API_DOMAIN))

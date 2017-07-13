@@ -1,0 +1,13 @@
+- hosts: master
+  tasks:
+   - name: Deploy sensor config
+     shell: kubectl create configmap sensor-config-$i --from-file=kubernetes/kube-configsensor.config/config.$i.cfg --namespace kube-system
+   - name: Deploy sensor
+     shell: kubectl create -f kubernetes/kube-config/sensor_simulator
+     
+   - name: Deplpy onem2m item
+     shell: kubectl create configmap onem2m-items-$i --from-file=kubernetes/kube-config/onem2m/onem2m.items/items.cfg --namespace kube-system
+
+   - name: Deploy onem2m platform
+     shell: kubectl create -f kubernetes/kube-config/onem2m
+

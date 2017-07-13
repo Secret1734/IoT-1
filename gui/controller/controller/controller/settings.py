@@ -137,6 +137,7 @@ REST_FRAMEWORK = {
 
 # Kubernetes config
 KUBE_API_DOMAIN = '128.199.242.5:8080'
+CLOUD_KUBE_API_DOMAIN = '188.166.238.158:8080'
 SENSOR_ORDINATOR_SERVICE_HOST = 'localhost:9090'
 CONTENT_TYPE = {'JSON': "application/json", 'TEXT': 'text/plain'}
 RESPONSE_JSON_TYPE_DEFINE = 'JSON'
@@ -144,14 +145,14 @@ RESPONSE_TEXT_TYPE_DEFINE = 'TEXT'
 
 IOT_PLATFORM = {
     'onem2m': {
-        'image': 'huanphan/onem2m:semi-final',
+        'image': 'huanphan/onem2m:semi-final-4',
         'config': {'name': 'onem2m-config', 'mountPath': '/usr/src/ipe_config/config.cfg', 'subPath': 'config.cfg'},
         'item': {'name': 'onem2m-items', 'mountPath': '/usr/src/ipe_config/items.cfg', 'subPath': 'items.cfg'},
         'config_configmap': {'name': 'onem2m-config', 'key': 'config.cfg', 'path': 'config.cfg'},
         'item_configmap': {'name': 'onem2m-items', 'key': 'items.cfg', 'path': 'items.cfg'}
     },
     'openhab': {
-        'image': 'huanphan/openhab:semi-final-5',
+        'image': 'huanphan/openhab:semi-final-6',
         'config': {'name': 'openhab-cfg', 'mountPath': '/openhab/configurations/openhab.cfg', 'subPath': 'openhab.cfg'},
         'item': {'name': 'openhab-items', 'mountPath': '/openhab/configurations/items/demo.items', 'subPath': 'demo.items'},
         'config_configmap': {'name': 'openhab-cfg', 'key': 'openhab.cfg', 'path': 'openhab.cfg'},
@@ -160,7 +161,7 @@ IOT_PLATFORM = {
 }
 
 SENSOR = {
-        'image': 'huanphan/sensor-simulator:semi-final-2',
+        'image': 'huanphan/sensor-simulator:semi-final-qos',
         'config': {'name': 'sensor-config', 'mountPath': '/SimulateSensor/config/config.cfg', 'subPath': 'config.cfg'},
         'item': {'name': 'sensor-items', 'mountPath': '/SimulateSensor/config/items.cfg', 'subPath': 'items.cfg'},
         'config_configmap': {'name': 'sensor-config', 'key': 'config.cfg', 'path': 'config.cfg'},

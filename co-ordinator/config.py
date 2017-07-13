@@ -1,1 +1,0 @@
-SQL_LITE_DB = 'sqlite:///db.sqlite3'

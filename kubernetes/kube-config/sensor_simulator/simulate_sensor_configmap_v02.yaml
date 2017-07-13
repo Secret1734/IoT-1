@@ -1,31 +1,41 @@
 apiVersion: v1
 kind: ReplicationController
 metadata:
-    name: sensor-gen
+    name: sensor-gen-1
     namespace: kube-system
 spec:
     replicas: 1
     selector:
-      app: sensor-gen
+      app: sensor-gen-1
     template:
       metadata:
-        name: sensor-gen
+        name: sensor-gen-1
         labels:
-          app: sensor-gen
+          app: sensor-gen-1
       spec:
         containers:
-        - name: sensor-gen
-          image: huanphan/sensor-simulator:0.2
-          ports:
-          - containerPort: 9090
+        - name: sensor-gen-1
+          image: huanphan/sensor-simulator:semi-final
           volumeMounts:
           - name: sensor-config
-            mountPath: /SimulateSensor/config
+            mountPath: /SimulateSensor/config/config.cfg
+            subPath: config.cfg
+          - name: sensor-items
+            mountPath: /SimulateSensor/config/items.cfg
+            subPath: items.cfg
         volumes:
         - name: sensor-config
           configMap:
-            name: sensor-config
+            name: sensor-config-1
             items:
-            - key: config.cfg
+            - key: config.1.cfg
               path: config.cfg
+        - name: sensor-items
+          configMap:
+            name: sensor-items-1
+            items:
+            - key: items.1.cfg
+              path: items.cfg
         restartPolicy: Always
+        #nodeSelector:
+        #  fog-node: worker_1

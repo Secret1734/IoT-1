@@ -1,0 +1,11 @@
+time_min = '2017-05-04 07:05:44'
+time_max = '2017-05-04 10:05:00'
+time_min_2 = '2017-05-04 07:05:44'
+time_max_2 = '2017-05-04 10:05:00'
+
+onem2m_naming = {'onem2m-1': '10 sensors', 'onem2m-2': '20 sensors', 'onem2m-3': '40 sensors'}
+openhab_naming = {'openhab-1': '10 sensors', 'openhab-2': '20 sensors', 'openhab-3': '40 sensors'}
+cloud_processing = ['measure-data-rate-1', 'measure-data-rate-2', 'measure-data-rate-3']
+cloud_processing_naming = {'measure-data-rate-1': '10 sensors', 'measure-data-rate-2': '20 sensors',
+                           'measure-data-rate-3': '40 sensors'}
+sensing_topic = ['sensor_1_1', 'sensor_2_1', 'sensor_3_1']

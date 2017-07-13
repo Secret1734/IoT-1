@@ -2332,18 +2332,26 @@ tcp:refreshinterval=250
 
 OPENHAB_ITEM = 'String /sensor_id/ "/sensor_id/: [%s]" {mqtt="<[mqttIn:/sensor_id/:state:default], >[mqttOut:/sensor_id/:state:*:EXEC(/openhab/configurations/get_timestamp.sh ${state} ${itemName})]"}\n'
 
-ONEM2M_ITEM = [{'item_name': 'test', 'topic': 'test', 'item_type': '1'}]
+ONEM2M_ITEM = "[{'item_name': 'test', 'topic': 'test', 'item_type': '1'}]"
+
+CLOUD_SENSING_ITEM = '/sensor_id/'
 
 ONEM2M_CONFIG = {"clientId": "OneM2M_1", "inbound_broker_addr": "tcp://mqtt-service:1883",
-                 "outbound_broker_addr": "tcp://188.166.238.158:30146"}
+                 "outbound_broker_addr": "tcp://188.166.238.158:30146", "qos": "0"}
 
 OPENHAB_ITEM_KEY = 'demo.items'
+
+CLOUD_SENSING_ITEM_KEY = 'items.1.cfg'
 
 OPENHAB_CONFIG_KEY = 'openhab.cfg'
 
 ONEM2M_CONFIG_KEY = 'config.cfg'
 
 ONEM2M_ITEM_KEY = 'items.cfg'
+
+CLOUD_SENSING_ITEM_CONFIG = 'measure-items-1'
+
+CLOUD_SENSING_ID = 'measure-data-rate-1'
 
 """
 {"kind":"ConfigMap","apiVersion":"v1","metadata":{"name":"onem2m-items-openhab-kube-system-test-16","namespace":"kube-system","selfLink":"/api/v1/namespaces/kube-system/configmaps/onem2m-items-openhab-kube-system-test-16","uid":"b0891c6e-2804-11e7-a3fd-7eb92be1eeb0","resourceVersion":"1104564","creationTimestamp":"2017-04-23T09:10:26Z"},"data":{"demo.items":"item"}}
@@ -2361,7 +2369,7 @@ SENSOR_ITEM = {
         'Body-Temperature-Sensor': 'name=Body-Temperature-Sensor-{id},topic={id},frequent={freq},type=IC,unit=Temperature:Fahrenheit,label=task:collect_temperature,namespace={namespace},version={version},resoure_type=sensor',
         'SONY-Light-Sensor-V1': 'name=SONY-Light-Sensor-V1-{id},topic={id},frequent={freq},type=IC,unit=LightMeter:ISO,label=task:light_meter,namespace={namespace},version={version},resoure_type=sensor',
         'ATA-Light-Sensor-V2': 'name=ATA-Light-Sensor-V2-{id},topic={id},frequent={freq},type=Semiconductor,unit=LightMeter:ISO,label=task:light_meter,namespace={namespace},version={version},resoure_type=sensor',
-        'SENSYS-Atmosphere-Sensor': 'name=SENSYS-Atmosphere-Sensor- id},topic={id},frequent={freq},type=IC,unit=Pressure:PSI,label=task:pressure_warning,namespace={namespace},version={version},resoure_type=sensor'
+        'SENSYS-Atmosphere-Sensor': 'name=SENSYS-Atmosphere-Sensor-{id},topic={id},frequent={freq},type=IC,unit=Pressure:PSI,label=task:pressure_warning,namespace={namespace},version={version},resoure_type=sensor'
 }
 SENSOR_ITEM_KEY = 'items.cfg'
 SENSOR_CONFIG = """ip_broker=mqtt-service
@@ -2369,7 +2377,8 @@ port_broker=1883
 broker_client_name=/broker_client_name/
 increase_freq=False
 increase_instance=True
-test_time=900
+test_time=10800
+qos=0
 """
 SENSOR_CONFIG_KEY = 'config.cfg'
 
@@ -2377,3 +2386,5 @@ REPLICATION_RESOURCE = 'replicationcontrollers'
 CONFIG_MAP_RESOURCE = 'configmaps'
 
 POD_RESOURCE = 'pods'
+
+CLOUD_NAMESPACE = 'cloud-kube-system'

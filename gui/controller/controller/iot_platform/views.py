@@ -53,7 +53,14 @@ def build_query(_time_min, _time_max):
     return 'SELECT * FROM "data_collect_rate" WHERE time >' + \
            _time_min + 's AND time < ' + _time_max + 's ;'
 
+def build_query_2(_time_min, _time_max):
+    return 'SELECT * FROM "data_collect_rate_kube-system" WHERE time >' + \
+           _time_min + 's AND time < ' + _time_max + 's ;'
+
 def execute_query(time_min, time_max):
     client = InfluxDBClient('188.166.238.158', 32485, 'root', 'root', 'k8s')
     _result = client.query(build_query(time_min, time_max), epoch='s')
-    return list(_result.get_points())
+    result = list(_result.get_points())
+    _result = client.query(build_query_2(time_min, time_max), epoch='s')
+    result.extend(list(_result))
+    return result

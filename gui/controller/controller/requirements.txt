@@ -1,0 +1,7 @@
+django==1.9.8
+djangorestframework==3.4.0
+django-cors-headers
+influxdb
+django-jet==1.0.5
+dicttoxml==1.7.4
+pyparsing==2.2.0

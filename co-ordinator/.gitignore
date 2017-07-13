@@ -1,7 +1,0 @@
-venv/
-logs/
-db.sqlite3
-data.db
-sensor_define/*
-.idea/
-**/__pycache__/
